@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web3.js Example</title>
+  <!-- Include Web3.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+</head>
+<body>
+  <h1>Web3.js Example</h1>
+
+  <label for="documentInput">Enter Document Content:</label>
+  <textarea id="documentInput" rows="4" cols="50"></textarea>
+  <br>
+  
+  <button onclick="hashAndUploadDocument()">Upload Document Hash</button>
+
+  <script>
+    const contractAddress = '0xb350a8C8d5031d8b93D5F8F99aD8BBB6C270d765'; // Replace with your deployed contract address
+    const abi = [
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "addAuthorizedUser",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "uploader",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "documentHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "HashUploaded",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "removeAuthorizedUser",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_documentHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "uploadHash",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "authorizedUsers",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "uploadedHashes",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]; // Replace with your smart contract's ABI
+    const web3 = new Web3(window.ethereum);
+
+    async function connectMetamask() {
+      if (window.ethereum) {
+        try {
+          // Request account access if needed
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          console.log('Connected to MetaMask.');
+          return window.ethereum.selectedAddress;
+        } catch (error) {
+          console.error('Error connecting to MetaMask:', error);
+        }
+      } else {
+        console.error('MetaMask not detected. Please install MetaMask.');
+      }
+    }
+
+    async function hashAndUploadDocument() {
+      const documentInput = document.getElementById('documentInput');
+      const documentToUpload = documentInput.value;
+
+      if (!documentToUpload) {
+        alert('Please enter document content.');
+        return;
+      }
+
+      const account = await connectMetamask();
+
+      if (account) {
+        const contract = new web3.eth.Contract(abi, contractAddress);
+
+        // Hash the document (you can use a suitable hashing algorithm)
+        const documentHash = web3.utils.sha3(documentToUpload);
+
+        // Call the smart contract method to upload the hash
+        try {
+          const transaction = await contract.methods
+            .uploadHash(documentHash)
+            .send({ from: account });
+
+          console.log('Transaction hash:', transaction.transactionHash);
+          console.log('Document hash uploaded successfully.');
+        } catch (error) {
+          console.error('Error uploading document hash:', error);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
