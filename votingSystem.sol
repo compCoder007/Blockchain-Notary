@@ -50,8 +50,8 @@ contract EnhancedVotingSystem {
         require(_proposalIndex < proposals.length, "Invalid proposal index");
 
         voters[msg.sender].hasVoted = true;
-        voters[msg.sender].voteWeight = 1; // For simplicity, each voter has equal weight
-        proposals[_proposalIndex].voteCount++;
+        
+        proposals[_proposalIndex].voteCount += voters[msg.sender].voteWeight;
 
         emit Voted(msg.sender, _proposalIndex, voters[msg.sender].voteWeight);
     }
